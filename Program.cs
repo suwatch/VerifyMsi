@@ -34,26 +34,28 @@ namespace VerifyMsi
             { "System.Spatial.dll", "5.6.2.61936" },
         };
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             try
             {
                 if (args.Length == 0)
                 {
                     Console.WriteLine(@"Usage: VerifyMsi.exe \\reddog\Builds\branches\git_aapt_antares_websites_master\80.0.7.48");
-                    return;
+                    return 1;
                 }
 
-                VerifyMsi(Path.Combine(args[0], @"retail-amd64\Hosting\WebHosting.msi"));
+                return VerifyMsi(Path.Combine(args[0], @"retail-amd64\Hosting\WebHosting.msi"));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
+            return 1;
         }
 
-        static void VerifyMsi(string msiFile)
+        static int VerifyMsi(string msiFile)
         {
+            int retVal = 0;
             var files = new SortedList<string, string>();
             using (var database = new Database(msiFile, DatabaseOpenMode.ReadOnly))
             {
@@ -83,12 +85,18 @@ namespace VerifyMsi
                     color = ConsoleColor.Green;
                     result = "matched";
                 }
+                else
+                {
+                    retVal = 1;
+                }
 
                 using (new ApplyFGColor(color))
                 {
                     Console.WriteLine("{0} = {1} ... {2}", file.Key, file.Value, result);
                 }
             }
+            
+            return retVal;
         }
 
         class ApplyFGColor : IDisposable
